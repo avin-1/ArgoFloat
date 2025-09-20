@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
 const Dashboard = () => {
   const [showMap, setShowMap] = useState(true);
+  const [position, setPosition] = useState([51.505, -0.09]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPosition([pos.coords.latitude, pos.coords.longitude]);
+      },
+      () => {
+        // Could handle error here, e.g. show a notification
+        console.log("Could not get user location.");
+      }
+    );
+  }, []);
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${!showMap ? 'map-hidden' : ''}`}>
       <div className="chat-container">
+        <div className="header">
+          <img src="https://img.icons8.com/color/48/000000/chat--v1.png" alt="Chat Logo" />
+          <h1>Conversational UI</h1>
+        </div>
         <div className="controls">
           <select>
             <option>Select Profession</option>
@@ -27,19 +44,19 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="map-container">
-        <button onClick={() => setShowMap(!showMap)}>
+        <button className="map-toggle-button" onClick={() => setShowMap(!showMap)}>
           {showMap ? 'Hide Map' : 'Show Map'}
         </button>
         {showMap && (
           <>
-            <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+            <MapContainer center={position} zoom={13} scrollWheelZoom={true} key={position.join(',')}>
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution='&copy; <a href="httpsa://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker position={[51.505, -0.09]}>
+              <Marker position={position}>
                 <Popup>
-                  A pretty CSS3 popup. <br /> Easily customizable.
+                  Your current location.
                 </Popup>
               </Marker>
             </MapContainer>
